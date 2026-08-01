@@ -36,7 +36,7 @@ export default function Sidebar() {
     ? new Date(state.lastScanAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
     : '尚未同步'
   return (
-    <aside className="hidden w-56 shrink-0 flex-col border-r border-slate-200 bg-white px-3 py-5 md:flex">
+    <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col overflow-y-auto border-r border-slate-200 bg-white px-3 py-5 md:flex">
       <div className="mb-6 flex items-center gap-2 px-2">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-500 text-white">
           <ShieldCheck size={17} />
@@ -114,12 +114,6 @@ export default function Sidebar() {
               ))}
             </div>
           )}
-        </div>
-
-        <div className="rounded-xl bg-slate-50 p-3 text-[11px] leading-relaxed text-slate-400">
-          比赛原型 · 全部数据为构造样例，
-          <br />
-          正式产品需接入授权数据源。
         </div>
       </div>
     </aside>
