@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CheckCircle2, Clock, RefreshCcw, ShieldAlert, XCircle } from 'lucide-react'
+import { CheckCircle2, Clock, Loader2, Pencil, RefreshCcw, Send, ShieldAlert, XCircle } from 'lucide-react'
 import { ActionRecord } from '../types'
 import { actionStatusStyle, actionTypeStyle } from '../ui/styles'
 import { useAppStore } from '../store/AppStore'
@@ -24,11 +24,36 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
   const style = actionStatusStyle[action.status]
   const typeStyle = actionTypeStyle[action.type]
   const [regenN, setRegenN] = useState(0)
+  const [editing, setEditing] = useState(false)
+  const [draftText, setDraftText] = useState(action.content)
+  const [sending, setSending] = useState(false)
+  const [justSent, setJustSent] = useState(false)
+  const isOutreach = action.type === '客户触达'
 
   function regenerate() {
     const next = (regenN + 1) % REGEN_SUFFIXES.length
     setRegenN(next)
     dispatch({ kind: 'REGENERATE', actionId: action.id, content: `${action.content.split('（')[0]}${REGEN_SUFFIXES[next]}` })
+  }
+
+  function startEdit() {
+    setDraftText(action.content)
+    setEditing(true)
+  }
+
+  function saveEdit() {
+    dispatch({ kind: 'EDIT', actionId: action.id, content: draftText })
+    setEditing(false)
+  }
+
+  function sendWithCeremony() {
+    setSending(true)
+    setTimeout(() => {
+      dispatch({ kind: 'EXECUTE', actionId: action.id })
+      setSending(false)
+      setJustSent(true)
+      setTimeout(() => setJustSent(false), 2200)
+    }, 1300)
   }
 
   return (
@@ -47,7 +72,39 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
       <p className="mt-1 text-xs text-slate-400">触发原因：{action.triggerReason}</p>
 
       <div className="mt-2">
-        <ActionContentPreview action={action} />
+        {editing ? (
+          <div className="rounded-xl border border-violet-200 bg-violet-50/40 p-3">
+            <textarea
+              value={draftText}
+              onChange={(e) => setDraftText(e.target.value)}
+              rows={4}
+              className="w-full resize-none rounded-lg border border-slate-200 bg-white p-2.5 text-sm text-slate-700 outline-none focus:border-violet-400"
+            />
+            <div className="mt-2 flex gap-2">
+              <button
+                onClick={saveEdit}
+                className="rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-violet-700"
+              >
+                保存文案
+              </button>
+              <button
+                onClick={() => setEditing(false)}
+                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-500 hover:bg-slate-50"
+              >
+                取消
+              </button>
+            </div>
+          </div>
+        ) : (
+          <ActionContentPreview action={action} />
+        )}
+
+        {justSent && isOutreach && (
+          <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700">
+            <CheckCircle2 size={13} />
+            已送达 · {new Date().toLocaleTimeString()}
+          </div>
+        )}
       </div>
 
       <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-slate-400 sm:grid-cols-4">
@@ -72,7 +129,7 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
 
       <div
         className={`mt-3 flex flex-wrap items-center gap-2 ${
-          !canApprove && !['已完成', '已取消'].includes(action.status) ? 'hidden' : ''
+          editing || (!canApprove && !['已完成', '已取消'].includes(action.status)) ? 'hidden' : ''
         }`}
       >
         {action.status === '待确认' && (
@@ -103,7 +160,7 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
           </>
         )}
 
-        {action.status === '已批准' && (
+        {action.status === '已批准' && !isOutreach && (
           <button
             onClick={() => dispatch({ kind: 'EXECUTE', actionId: action.id })}
             className="rounded-lg px-3 py-1.5 text-xs font-medium text-white opacity-95 hover:opacity-100"
@@ -113,11 +170,29 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
           </button>
         )}
 
-        {action.type === '客户触达' && (action.status === '待确认' || action.status === '已批准') && (
-          <button onClick={regenerate} className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-500 hover:bg-slate-50">
-            <RefreshCcw size={13} />
-            重新生成
+        {action.status === '已批准' && isOutreach && !editing && (
+          <button
+            onClick={sendWithCeremony}
+            disabled={sending}
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white opacity-95 hover:opacity-100 disabled:opacity-70"
+            style={{ background: typeStyle.accent }}
+          >
+            {sending ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+            {sending ? '发送中…' : '确认发送'}
           </button>
+        )}
+
+        {isOutreach && (action.status === '待确认' || action.status === '已批准') && !editing && (
+          <>
+            <button onClick={startEdit} className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-500 hover:bg-slate-50">
+              <Pencil size={13} />
+              编辑文案
+            </button>
+            <button onClick={regenerate} className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-500 hover:bg-slate-50">
+              <RefreshCcw size={13} />
+              换一版
+            </button>
+          </>
         )}
 
         {action.status === '等待客户结果' && !action.customerReply && (
