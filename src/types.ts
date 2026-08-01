@@ -81,6 +81,9 @@ export type ActionStatus =
   | '需升级'
   | '已取消'
 
+export type OutreachScenario = 'stagnant' | 'renewal' | 'value'
+export type OutreachChannel = '企业微信' | '电话' | '邮件'
+
 export interface ActionRecord {
   id: string
   customerId: string
@@ -90,6 +93,8 @@ export interface ActionRecord {
   target: string
   channel: string
   content: string
+  outreachScenario?: OutreachScenario
+  variantIndex?: number
   owner: string
   needsApproval: boolean
   status: ActionStatus

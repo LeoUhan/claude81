@@ -12,6 +12,19 @@ function parseChecklist(content: string): string[] {
   return parts
 }
 
+function parsePhoneScript(content: string): string[] {
+  return content
+    .split(/[①②③④⑤⑥]\s*/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+}
+
+function parseEmail(content: string): { subject: string; body: string } {
+  const subjectMatch = content.match(/主题：([^\n]+)/)
+  const body = content.replace(/主题：[^\n]+\n*/, '').trim()
+  return { subject: subjectMatch?.[1]?.trim() ?? '', body }
+}
+
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg bg-slate-50 px-2 py-2 text-center">
@@ -23,6 +36,35 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 export default function ActionContentPreview({ action }: { action: ActionRecord }) {
   if (action.type === '客户触达') {
+    if (action.channel === '电话') {
+      const steps = parsePhoneScript(action.content)
+      return (
+        <div className="rounded-xl border border-slate-100">
+          <div className="flex items-center gap-1.5 rounded-t-xl bg-slate-800 px-3.5 py-2 text-xs font-medium text-white">📞 通话要点脚本</div>
+          <div className="divide-y divide-slate-50">
+            {steps.map((s, i) => (
+              <div key={i} className="px-3.5 py-2 text-sm leading-relaxed text-slate-700">
+                {s}
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    if (action.channel === '邮件') {
+      const { subject, body } = parseEmail(action.content)
+      return (
+        <div className="overflow-hidden rounded-xl border border-slate-200">
+          <div className="border-b border-slate-100 bg-slate-50 px-3.5 py-2">
+            <span className="text-[10px] text-slate-400">主题</span>
+            <p className="text-sm font-medium text-slate-800">{subject}</p>
+          </div>
+          <div className="whitespace-pre-line px-3.5 py-3 text-sm leading-relaxed text-slate-600">{body}</div>
+        </div>
+      )
+    }
+
     return (
       <div className="rounded-xl bg-sky-50/60 p-3">
         <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-white px-3.5 py-2.5 text-sm leading-relaxed text-slate-700 shadow-sm">
@@ -45,17 +87,12 @@ export default function ActionContentPreview({ action }: { action: ActionRecord 
           <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
           <span className="ml-1 flex-1 truncate rounded bg-white px-2 py-0.5 text-[10px] text-slate-400">{action.target}</span>
         </div>
-        <div className="px-3.5 py-3 text-sm leading-relaxed text-slate-600">{action.content}</div>
         {hasPeerReason && (
-          <div className="border-t border-slate-100 bg-slate-50/60 px-3.5 py-3">
-            <a href={peerReferenceImg} target="_blank" rel="noreferrer" className="block overflow-hidden rounded-lg border border-slate-200">
-              <img src={peerReferenceImg} alt="同行业真实企业官网参考" className="max-h-40 w-full object-cover object-top" />
-            </a>
-            <p className="mt-1.5 text-[11px] text-slate-400">
-              同行业结构参考：英科镭（ENCREA）官网解决方案页 · 真实网站截图，用于参考页面信息结构，非本客户直接竞争对手
-            </p>
-          </div>
+          <a href={peerReferenceImg} target="_blank" rel="noreferrer" className="block border-b border-slate-100">
+            <img src={peerReferenceImg} alt="同行业真实企业官网参考" className="w-full" />
+          </a>
         )}
+        <div className="px-3.5 py-3 text-sm leading-relaxed text-slate-600">{action.content}</div>
       </div>
     )
   }

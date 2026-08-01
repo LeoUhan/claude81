@@ -44,6 +44,7 @@ type Action =
   | { kind: 'CANCEL'; actionId: string; reason: string }
   | { kind: 'REGENERATE'; actionId: string; content: string }
   | { kind: 'EDIT'; actionId: string; content: string }
+  | { kind: 'SET_CHANNEL'; actionId: string; channel: string; content: string; variantIndex: number }
   | { kind: 'ADD_ACTION'; action: ActionRecord }
   | { kind: 'RESET' }
 
@@ -139,6 +140,15 @@ function reducer(state: State, action: Action): State {
         ...a,
         content: action.content,
         history: [...a.history, { at: now, note: '负责人已手动修改文案' }],
+      }))
+
+    case 'SET_CHANNEL':
+      return updateAction(state, action.actionId, (a) => ({
+        ...a,
+        channel: action.channel,
+        content: action.content,
+        variantIndex: action.variantIndex,
+        history: [...a.history, { at: now, note: `已切换联系渠道为「${action.channel}」并重新生成文案` }],
       }))
 
     case 'ADD_ACTION': {

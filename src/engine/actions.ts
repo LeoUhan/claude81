@@ -1,4 +1,5 @@
 import { ActionRecord, ActionStatus, ActionType, CustomerRecord, SignalEvent } from '../types'
+import { buildOutreachContent } from './outreachContent'
 
 let counter = 0
 function aid(customerId: string) {
@@ -67,7 +68,9 @@ export function generateActionsForCustomer(
         triggerReason: `检测到运营停滞：${signals.find((s) => s.type === '运营停滞')?.text}`,
         target: `${c.name} 网站管理员`,
         channel: '企业微信',
-        content: `您好，注意到贵司网站已有一段时间未更新产品信息。我们发现更新 1-2 个核心产品页即可较快恢复搜索曝光，是否需要我们协助整理一版更新草稿？`,
+        content: buildOutreachContent('stagnant', '企业微信', 0, c),
+        outreachScenario: 'stagnant',
+        variantIndex: 0,
         owner: c.owner,
         needsApproval: true,
         deadline: inDays(2),
@@ -128,8 +131,10 @@ export function generateActionsForCustomer(
           purpose: '续费前价值沟通与挽留',
           triggerReason: `续费窗口临近（${c.daysToRenewal} 天）且健康度存在风险`,
           target: `${c.name} 决策人`,
-          channel: '企业微信 / 邮件',
-          content: `您好，即将进入续费周期。过去一个周期内网站为贵司带来 ${c.metrics.inquiryCount} 条询盘，我们也识别到 ${c.metrics.trafficTrendPct < 0 ? '访问量有所下降，正在着手优化' : '表现保持稳定'}。附上本周期价值总结，希望继续为贵司提供支持。`,
+          channel: '企业微信',
+          content: buildOutreachContent('renewal', '企业微信', 0, c),
+          outreachScenario: 'renewal',
+          variantIndex: 0,
           owner: c.owner,
           needsApproval: true,
           deadline: inDays(3),
@@ -150,7 +155,9 @@ export function generateActionsForCustomer(
         triggerReason: `检测到持续价值信号：${signals.find((s) => s.type === '持续价值')?.text}`,
         target: `${c.name} 决策人`,
         channel: '企业微信',
-        content: `您好，本周期贵司网站访问量增长 ${c.metrics.trafficTrendPct}%，询盘增长 ${c.metrics.inquiryTrendPct}%。附上 ${c.industry} 行业的下一步优化建议，帮助进一步扩大询盘转化。`,
+        content: buildOutreachContent('value', '企业微信', 0, c),
+        outreachScenario: 'value',
+        variantIndex: 0,
         owner: c.owner,
         needsApproval: true,
         deadline: inDays(4),

@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { CheckCircle2, Clock, Loader2, Pencil, RefreshCcw, Send, ShieldAlert, XCircle } from 'lucide-react'
-import { ActionRecord } from '../types'
+import { ActionRecord, OutreachChannel } from '../types'
 import { actionStatusStyle, actionTypeStyle } from '../ui/styles'
-import { useAppStore } from '../store/AppStore'
+import { useAppStore, customerSeed } from '../store/AppStore'
 import { useRole } from '../store/RoleContext'
+import { buildCustomerView } from '../engine/selectors'
+import { OUTREACH_CHANNELS, buildOutreachContent } from '../engine/outreachContent'
 import ActionContentPreview from './ActionContentPreview'
 
 const REPLY_INTENTS: { intent: string; text: string; sentiment: number }[] = [
@@ -14,26 +16,38 @@ const REPLY_INTENTS: { intent: string; text: string; sentiment: number }[] = [
   { intent: '技术问题', text: '后台登录一直报错，麻烦帮忙看一下。', sentiment: -0.2 },
 ]
 
-const REGEN_SUFFIXES = ['（更简洁的版本）', '（更强调数据依据的版本）', '（更委婉的版本）']
+const REVIEW_LABEL: Record<'improved' | 'no-change' | 'escalate', string> = {
+  improved: '风险降低 / 已改善',
+  'no-change': '暂无明显改善',
+  escalate: '需升级人工',
+}
 
 export default function ActionCard({ action, customerName }: { action: ActionRecord; customerName?: string }) {
-  const { dispatch } = useAppStore()
+  const { state, dispatch } = useAppStore()
   const { canApprove } = useRole()
   const [showReply, setShowReply] = useState(false)
-  const [showReview, setShowReview] = useState(false)
   const style = actionStatusStyle[action.status]
   const typeStyle = actionTypeStyle[action.type]
-  const [regenN, setRegenN] = useState(0)
   const [editing, setEditing] = useState(false)
   const [draftText, setDraftText] = useState(action.content)
   const [sending, setSending] = useState(false)
   const [justSent, setJustSent] = useState(false)
+  const [reviewStage, setReviewStage] = useState<'idle' | 'loading' | 'confirm'>('idle')
+  const [reviewSnapshot, setReviewSnapshot] = useState<ReturnType<typeof buildCustomerView>['health'] | null>(null)
   const isOutreach = action.type === '客户触达'
+  const customer = customerSeed.find((c) => c.id === action.customerId)
 
   function regenerate() {
-    const next = (regenN + 1) % REGEN_SUFFIXES.length
-    setRegenN(next)
-    dispatch({ kind: 'REGENERATE', actionId: action.id, content: `${action.content.split('（')[0]}${REGEN_SUFFIXES[next]}` })
+    if (!customer || !action.outreachScenario) return
+    const nextVariant = (action.variantIndex ?? 0) + 1
+    const content = buildOutreachContent(action.outreachScenario, action.channel as OutreachChannel, nextVariant, customer)
+    dispatch({ kind: 'REGENERATE', actionId: action.id, content })
+  }
+
+  function switchChannel(channel: OutreachChannel) {
+    if (!customer || !action.outreachScenario || channel === action.channel) return
+    const content = buildOutreachContent(action.outreachScenario, channel, 0, customer)
+    dispatch({ kind: 'SET_CHANNEL', actionId: action.id, channel, content, variantIndex: 0 })
   }
 
   function startEdit() {
@@ -56,6 +70,22 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
     }, 1300)
   }
 
+  function startReview() {
+    setReviewStage('loading')
+    setTimeout(() => {
+      if (customer) {
+        const view = buildCustomerView(customer, state.actions)
+        setReviewSnapshot(view.health)
+      }
+      setReviewStage('confirm')
+    }, 1300)
+  }
+
+  function confirmReview(outcome: 'improved' | 'no-change' | 'escalate') {
+    dispatch({ kind: 'REVIEW', actionId: action.id, outcome })
+    setReviewStage('idle')
+  }
+
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4">
       <div className="flex flex-wrap items-center gap-2">
@@ -71,13 +101,31 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
       <p className="mt-2 text-sm font-medium text-slate-800">{action.purpose}</p>
       <p className="mt-1 text-xs text-slate-400">触发原因：{action.triggerReason}</p>
 
+      {isOutreach && !editing && (action.status === '待确认' || action.status === '已批准') && (
+        <div className="mt-2 flex items-center gap-1.5">
+          <span className="text-[11px] text-slate-400">联系渠道：</span>
+          {OUTREACH_CHANNELS.map((ch) => (
+            <button
+              key={ch}
+              onClick={() => switchChannel(ch)}
+              className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
+                action.channel === ch ? 'text-white' : 'border border-slate-200 text-slate-500 hover:bg-slate-50'
+              }`}
+              style={action.channel === ch ? { background: typeStyle.accent } : undefined}
+            >
+              {ch}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="mt-2">
         {editing ? (
           <div className="rounded-xl border border-violet-200 bg-violet-50/40 p-3">
             <textarea
               value={draftText}
               onChange={(e) => setDraftText(e.target.value)}
-              rows={4}
+              rows={5}
               className="w-full resize-none rounded-lg border border-slate-200 bg-white p-2.5 text-sm text-slate-700 outline-none focus:border-violet-400"
             />
             <div className="mt-2 flex gap-2">
@@ -224,33 +272,51 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
 
         {action.status === '已收到结果' && (
           <div className="w-full">
-            <button
-              onClick={() => setShowReview((v) => !v)}
-              className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700"
-            >
-              进行复查
-            </button>
-            {showReview && (
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                <button
-                  onClick={() => dispatch({ kind: 'REVIEW', actionId: action.id, outcome: 'improved' })}
-                  className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700 hover:bg-emerald-100"
-                >
-                  风险降低 / 已改善
-                </button>
-                <button
-                  onClick={() => dispatch({ kind: 'REVIEW', actionId: action.id, outcome: 'no-change' })}
-                  className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-medium text-amber-700 hover:bg-amber-100"
-                >
-                  暂无明显改善
-                </button>
-                <button
-                  onClick={() => dispatch({ kind: 'REVIEW', actionId: action.id, outcome: 'escalate' })}
-                  className="flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-1 text-[11px] font-medium text-rose-700 hover:bg-rose-100"
-                >
-                  <ShieldAlert size={12} />
-                  需升级人工
-                </button>
+            {reviewStage === 'idle' && (
+              <button onClick={startReview} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700">
+                进行复查
+              </button>
+            )}
+
+            {reviewStage === 'loading' && (
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <Loader2 size={14} className="animate-spin text-slate-400" />
+                复查中…正在重新读取客户最新信号与健康度
+              </div>
+            )}
+
+            {reviewStage === 'confirm' && reviewSnapshot && (
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <p className="text-xs font-medium text-slate-600">复查依据（本次重新计算的结果）</p>
+                <p className="mt-1 text-sm text-slate-700">
+                  当前健康度 <span className="font-semibold">{reviewSnapshot.score}</span> 分（{reviewSnapshot.level}）
+                </p>
+                <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs text-slate-500">
+                  {reviewSnapshot.factors.slice(0, 3).map((f, i) => (
+                    <li key={i}>{f}</li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-[11px] text-slate-400">
+                  预期观察指标：{action.expectedMetric}。请基于以上依据判断本次动作是否达到预期。
+                </p>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {(['improved', 'no-change', 'escalate'] as const).map((outcome) => (
+                    <button
+                      key={outcome}
+                      onClick={() => confirmReview(outcome)}
+                      className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                        outcome === 'improved'
+                          ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                          : outcome === 'no-change'
+                            ? 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                            : 'bg-rose-50 text-rose-700 hover:bg-rose-100'
+                      }`}
+                    >
+                      {outcome === 'escalate' && <ShieldAlert size={12} />}
+                      {REVIEW_LABEL[outcome]}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
