@@ -8,6 +8,7 @@ import { useAppStore, customerSeed } from '../store/AppStore'
 import { useRole } from '../store/RoleContext'
 import { buildCustomerView, priorityRank } from '../engine/selectors'
 import { buildPriorityQueue } from '../engine/priority'
+import { buildHeroEvents } from '../engine/heroStream'
 
 export default function Dashboard() {
   const { state } = useAppStore()
@@ -28,6 +29,7 @@ export default function Dashboard() {
   const avgLead =
     atRisk.length > 0 ? Math.round(atRisk.reduce((s, v) => s + v.customer.daysToRenewal, 0) / atRisk.length) : 0
   const peerGapCount = views.filter((v) => v.signals.some((s) => s.type === '同行落后')).length
+  const heroEvents = useMemo(() => buildHeroEvents(views, scopedActions), [views, scopedActions])
 
   return (
     <>
@@ -39,6 +41,7 @@ export default function Dashboard() {
           actionCount={scopedActions.length}
           avgLead={avgLead}
           peerGapCount={peerGapCount}
+          events={heroEvents}
         />
 
         <AgentPanel views={views} />
