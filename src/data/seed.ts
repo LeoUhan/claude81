@@ -1,0 +1,28 @@
+import { CustomerRecord } from '../types'
+
+export const customerSeed: CustomerRecord[] = [
+  { id: 'A', name: 'A 潜水泵出口业务', industry: '流体设备', region: '东南亚', owner: 'CSM-001', domain: 'a-pump.example.com', plan: '标准版', daysToRenewal: 68, agentEnabledDaysAgo: 30,
+    metrics: { loginDaysAgo: 45, contentUpdateDaysAgo: 90, trafficTrendPct: -18, inquiryCount: 2, inquiryTrendPct: -30, inquiryValid: true, renewalHistory: '已续费' } },
+  { id: 'B', name: 'B 精密机械制造', industry: '精密机械', region: '华东', owner: 'CSM-002', domain: 'b-precision.example.com', plan: '标准版', daysToRenewal: 39, agentEnabledDaysAgo: 30,
+    metrics: { loginDaysAgo: 10, contentUpdateDaysAgo: 20, trafficTrendPct: -22, inquiryCount: 5, inquiryTrendPct: -10, inquiryValid: true, renewalHistory: '已续费' } },
+  { id: 'C', name: 'C 工业阀门工厂', industry: '工业阀门', region: '华南', owner: 'CSM-001', domain: 'c-valve.example.com', plan: '高级版', daysToRenewal: 116, agentEnabledDaysAgo: 30,
+    metrics: { loginDaysAgo: 2, contentUpdateDaysAgo: 10, trafficTrendPct: 8, inquiryCount: 14, inquiryTrendPct: 12, inquiryValid: true, renewalHistory: '已续费' } },
+  { id: 'D', name: 'D 工业电机供应商', industry: '工业电机', region: '华北', owner: 'CSM-003', domain: 'd-motor.example.com', plan: '标准版', daysToRenewal: 22, agentEnabledDaysAgo: 30,
+    metrics: { loginDaysAgo: 6, contentUpdateDaysAgo: 25, trafficTrendPct: -4, inquiryCount: 7, inquiryTrendPct: -5, inquiryValid: true, renewalHistory: '已续费' } },
+  { id: 'E', name: 'E 电子元件出口商', industry: '电子元件', region: '华东', owner: 'CSM-002', domain: 'e-elec.example.com', plan: '标准版', daysToRenewal: 18, agentEnabledDaysAgo: 30,
+    metrics: { loginDaysAgo: 45, contentUpdateDaysAgo: 50, trafficTrendPct: -5, inquiryCount: 0, inquiryTrendPct: -80, inquiryValid: false, renewalHistory: '首次合作' } },
+  { id: 'F', name: 'F 包装设备制造商', industry: '包装设备', region: '华南', owner: 'CSM-003', domain: 'f-pack.example.com', plan: '标准版', daysToRenewal: 47, agentEnabledDaysAgo: 30,
+    metrics: { loginDaysAgo: 8, contentUpdateDaysAgo: 35, trafficTrendPct: 2, inquiryCount: 9, inquiryTrendPct: 3, inquiryValid: true, renewalHistory: '已续费' } },
+  { id: 'G', name: 'G 水处理工程公司', industry: '水处理', region: '西南', owner: 'CSM-001', domain: 'g-water.example.com', plan: '标准版', daysToRenewal: 83, agentEnabledDaysAgo: 30,
+    metrics: { loginDaysAgo: 20, contentUpdateDaysAgo: 100, trafficTrendPct: -25, inquiryCount: 3, inquiryTrendPct: -20, inquiryValid: true, renewalHistory: '首次合作' } },
+  { id: 'H', name: 'H 轴承零部件工厂', industry: '轴承零部件', region: '华东', owner: 'CSM-002', domain: 'h-bearing.example.com', plan: '高级版', daysToRenewal: 135, agentEnabledDaysAgo: 30,
+    metrics: { loginDaysAgo: 4, contentUpdateDaysAgo: 15, trafficTrendPct: 15, inquiryCount: 11, inquiryTrendPct: 18, inquiryValid: true, renewalHistory: '已续费' } },
+  { id: 'I', name: 'I 自动化设备集成商', industry: '自动化设备', region: '华北', owner: 'CSM-003', domain: 'i-auto.example.com', plan: '高级版', daysToRenewal: 174, agentEnabledDaysAgo: 30,
+    metrics: { loginDaysAgo: 1, contentUpdateDaysAgo: 8, trafficTrendPct: 20, inquiryCount: 16, inquiryTrendPct: 22, inquiryValid: true, renewalHistory: '已续费' } },
+  { id: 'J', name: 'J 农机配件厂', industry: '农机配件', region: '东北', owner: 'CSM-001', domain: 'j-farm.example.com', plan: '标准版', daysToRenewal: 72, agentEnabledDaysAgo: 30,
+    metrics: { loginDaysAgo: 12, contentUpdateDaysAgo: 40, trafficTrendPct: -8, inquiryCount: 6, inquiryTrendPct: -6, inquiryValid: true, renewalHistory: '已续费' } },
+  { id: 'K', name: 'K 机床配套供应商', industry: '机床配套', region: '华南', owner: 'CSM-002', domain: 'k-machine.example.com', plan: '标准版', daysToRenewal: 28, agentEnabledDaysAgo: 30,
+    metrics: { loginDaysAgo: 5, contentUpdateDaysAgo: 22, trafficTrendPct: 5, inquiryCount: 10, inquiryTrendPct: 8, inquiryValid: true, renewalHistory: '已续费' } },
+  { id: 'L', name: 'L 新材料加工企业', industry: '新材料', region: '华中', owner: 'CSM-003', domain: 'l-material.example.com', plan: '标准版', daysToRenewal: 105, agentEnabledDaysAgo: 30,
+    metrics: { loginDaysAgo: 30, contentUpdateDaysAgo: 80, trafficTrendPct: -15, inquiryCount: 2, inquiryTrendPct: -35, inquiryValid: true, renewalHistory: '曾降级' } },
+]
