@@ -88,25 +88,12 @@ function TrendTile({ label, pct }: { label: string; pct: number }) {
 export default function ClientProposalModal({ doc, onClose }: { doc: ProposalDoc; onClose: () => void }) {
   const portalTarget = document.getElementById('root') ?? document.body
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-slate-900/50 p-6 print:bg-white print:p-0">
-      <div className="sticky top-0 z-10 mb-4 flex w-full max-w-[860px] items-center justify-end gap-2 print:hidden">
-        <button
-          onClick={() => window.print()}
-          className="flex items-center gap-1.5 rounded-full bg-violet-600 px-3.5 py-1.5 text-xs font-medium text-white shadow hover:bg-violet-700"
-        >
-          <Download size={13} />
-          导出 PDF
-        </button>
-        <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-slate-500 shadow hover:bg-slate-50">
-          <X size={16} />
-        </button>
-      </div>
-
+    <div className="fixed inset-0 z-[60] flex flex-col items-center overflow-y-auto bg-slate-900/50 p-6 print:bg-white print:p-0">
       <div
         id="proposal-print-area"
         className="w-full max-w-[860px] rounded-lg bg-white shadow-2xl print:rounded-none print:shadow-none"
       >
-        <div className="flex items-center justify-between rounded-t-lg bg-gradient-to-r from-slate-900 to-slate-700 px-8 py-6 text-white print:rounded-none">
+        <div className="flex items-start justify-between rounded-t-lg bg-gradient-to-r from-slate-900 to-slate-700 px-8 py-6 text-white print:rounded-none">
           <div>
             <p className="text-[10px] tracking-[0.2em] text-slate-300">VALUE-GUARD PROPOSAL</p>
             <h1 className="mt-1 text-xl font-bold">网站运营诊断与改进方案</h1>
@@ -114,9 +101,23 @@ export default function ClientProposalModal({ doc, onClose }: { doc: ProposalDoc
               {doc.customerName} · {doc.industry} · {doc.domain}
             </p>
           </div>
-          <div className="text-right text-[11px] text-slate-300">
-            <p>日期：{doc.preparedDate}</p>
-            <p>编制人：{doc.preparedBy}</p>
+          <div className="flex items-start gap-3">
+            <div className="text-right text-[11px] text-slate-300">
+              <p>日期：{doc.preparedDate}</p>
+              <p>编制人：{doc.preparedBy}</p>
+            </div>
+            <div className="flex shrink-0 items-center gap-1.5 print:hidden">
+              <button
+                onClick={() => window.print()}
+                className="flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-medium text-white hover:bg-white/25"
+              >
+                <Download size={12} />
+                导出 PDF
+              </button>
+              <button onClick={onClose} className="flex h-6 w-6 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25">
+                <X size={13} />
+              </button>
+            </div>
           </div>
         </div>
 
