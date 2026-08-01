@@ -110,44 +110,52 @@ export default function CustomerDetail() {
         </div>
 
         {/* 概览 */}
-        <div className="flex flex-wrap items-center gap-6 rounded-xl border border-slate-200 bg-white p-5">
-          <div className="flex items-center gap-4">
-            <HealthRing value={view.health.score} size={72} stroke={7} />
-            <div>
-              <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${style.bg} ${style.text}`}>
-                <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
-                {view.health.level}
-              </span>
-              <span className="ml-2 text-xs font-semibold text-rose-500">流失概率 {view.churnProbability}%</span>
-              <p className="mt-1 text-xs text-slate-400">距合同到期 {customer.daysToRenewal} 天 · {customer.plan} · {customer.domain}</p>
-              {sentiment && (
-                <p className="mt-1 text-xs">
-                  客户情感：最近一次「{sentiment.latestIntent}」（{sentiment.latest.toFixed(1)}）
-                  <span className={`ml-1 font-medium ${SENTIMENT_LABEL[sentiment.trend].className}`}>
-                    {SENTIMENT_LABEL[sentiment.trend].text}
-                  </span>
+        <div className="rounded-xl border border-slate-200 bg-white p-5">
+          <div className="flex flex-col gap-5 md:flex-row md:items-center">
+            <div className="flex items-center gap-4 md:w-72 md:shrink-0 md:border-r md:border-slate-100 md:pr-5">
+              <HealthRing value={view.health.score} size={72} stroke={7} />
+              <div className="min-w-0">
+                <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${style.bg} ${style.text}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
+                  {view.health.level}
+                </span>
+                <span className="ml-2 text-xs font-semibold text-rose-500">流失概率 {view.churnProbability}%</span>
+                <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
+                  距合同到期 {customer.daysToRenewal} 天
+                  <br />
+                  {customer.plan} · {customer.domain}
                 </p>
-              )}
+                {sentiment && (
+                  <p className="mt-1.5 text-xs">
+                    客户情感：「{sentiment.latestIntent}」（{sentiment.latest.toFixed(1)}）
+                    <span className={`ml-1 font-medium ${SENTIMENT_LABEL[sentiment.trend].className}`}>
+                      {SENTIMENT_LABEL[sentiment.trend].text}
+                    </span>
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="flex flex-1 flex-wrap gap-5">
-            {(Object.keys(HEALTH_WEIGHTS) as Array<keyof typeof HEALTH_WEIGHTS>).map((k) => {
-              const v = view.health.subScores[k]
-              return (
-                <div key={k} className="flex w-20 flex-col items-center text-center">
-                  {v === null ? (
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-slate-200 text-xs text-slate-300">
-                      缺失
+            <div className="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              {(Object.keys(HEALTH_WEIGHTS) as Array<keyof typeof HEALTH_WEIGHTS>).map((k) => {
+                const v = view.health.subScores[k]
+                return (
+                  <div key={k} className="flex flex-col items-center gap-2 rounded-xl bg-slate-50/70 py-4 text-center">
+                    {v === null ? (
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-slate-200 text-xs text-slate-300">
+                        缺失
+                      </div>
+                    ) : (
+                      <HealthRing value={v} size={56} stroke={6} />
+                    )}
+                    <div>
+                      <p className="text-[11px] font-medium leading-tight text-slate-600">{DIM_LABEL[k]}</p>
+                      <p className="text-[10px] text-slate-400">权重 {Math.round(HEALTH_WEIGHTS[k] * 100)}%</p>
                     </div>
-                  ) : (
-                    <HealthRing value={v} size={56} stroke={6} />
-                  )}
-                  <span className="mt-1.5 text-[10.5px] leading-tight text-slate-500">{DIM_LABEL[k]}</span>
-                  <span className="text-[10px] text-slate-300">权重 {Math.round(HEALTH_WEIGHTS[k] * 100)}%</span>
-                </div>
-              )
-            })}
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </div>
 

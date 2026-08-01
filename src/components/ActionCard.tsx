@@ -150,7 +150,7 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
         {justSent && isOutreach && (
           <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700">
             <CheckCircle2 size={13} />
-            已送达 · {new Date().toLocaleTimeString()}
+            {action.channel === '电话' ? '通话已完成' : '已送达'} · {new Date().toLocaleTimeString()}
           </div>
         )}
       </div>
@@ -188,7 +188,7 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
               style={{ background: typeStyle.accent }}
             >
               <CheckCircle2 size={13} />
-              人工确认授权
+              {isOutreach ? `确认授权：以「${action.channel}」联系客户` : '人工确认授权'}
             </button>
             {!action.needsApproval && (
               <button
@@ -226,7 +226,7 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
             style={{ background: typeStyle.accent }}
           >
             {sending ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
-            {sending ? '发送中…' : '确认发送'}
+            {sending ? (action.channel === '电话' ? '拨打中…' : '发送中…') : action.channel === '电话' ? '确认拨打' : '确认发送'}
           </button>
         )}
 
