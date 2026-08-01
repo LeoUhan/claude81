@@ -191,16 +191,35 @@ export default function ClientProposalModal({ doc, onClose }: { doc: ProposalDoc
             改进建议
           </h2>
           <p className="mt-2 text-sm font-medium text-violet-700">{doc.recommendationTitle}</p>
-          <ol className="mt-2.5 space-y-2">
-            {doc.recommendationSteps.map((step, i) => (
-              <li key={i} className="flex items-start gap-2.5 rounded-lg bg-violet-50/50 p-2.5 text-sm text-slate-700">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-600 text-[10px] font-semibold text-white">
-                  {i + 1}
-                </span>
-                {step}
-              </li>
+
+          <div className="mt-3 space-y-4">
+            {doc.recommendationBlocks.map((block, bi) => (
+              <div key={bi}>
+                <p className="text-xs font-semibold text-slate-500">{block.heading}</p>
+                {block.kind === 'list' ? (
+                  <ul className="mt-1.5 space-y-2">
+                    {block.items.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2.5 rounded-lg bg-violet-50/50 p-2.5 text-sm text-slate-700">
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-600 text-[10px] font-semibold text-white">
+                          {i + 1}
+                        </span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="mt-1.5 space-y-2">
+                    {block.items.map((qa, i) => (
+                      <div key={i} className="rounded-lg border border-slate-100 bg-white p-2.5 shadow-sm">
+                        <p className="text-sm font-medium text-slate-800">Q{i + 1}：{qa.q}</p>
+                        <p className="mt-1 text-[13px] text-slate-500">A{i + 1}：{qa.a}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
-          </ol>
+          </div>
         </section>
 
         <section className="p-6 pt-1">
