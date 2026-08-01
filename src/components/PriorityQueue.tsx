@@ -25,13 +25,13 @@ export default function PriorityQueue({ items, total }: { items: PriorityItem[];
   const { openDrawer } = useAgent()
 
   return (
-    <div className="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-5">
+    <div className="flex flex-col rounded-xl border border-slate-200 bg-white p-5">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-slate-800">优先队列</h2>
         <span className="text-[11px] text-slate-400">共 {total} 个客户</span>
       </div>
 
-      <div className="flex-1 space-y-2.5 overflow-y-auto">
+      <div className="space-y-2.5">
         {items.map((item, i) => {
           const style = CATEGORY_STYLE[item.category]
           return (

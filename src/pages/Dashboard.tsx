@@ -45,9 +45,9 @@ export default function Dashboard() {
 
         <AgentPanel views={views} />
 
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.6fr_1fr]">
+        <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[1.6fr_1fr]">
           <RiskQuadrant views={views} />
-          <PriorityQueue items={priorityItems} total={views.length} />
+          <PriorityQueue items={priorityItems.slice(0, 4)} total={views.length} />
         </div>
       </main>
     </>
