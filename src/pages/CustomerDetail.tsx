@@ -4,11 +4,14 @@ import { ArrowLeft, Sparkles } from 'lucide-react'
 import Topbar from '../components/Topbar'
 import HealthRing from '../components/HealthRing'
 import ActionSummaryCard from '../components/ActionSummaryCard'
+import TrendBars from '../components/TrendBars'
 import { useAppStore, customerSeed } from '../store/AppStore'
 import { useAgent } from '../store/AgentContext'
 import { buildCustomerView, computeSentimentTrend } from '../engine/selectors'
-import { riskLevelStyle, confidenceStyle } from '../ui/styles'
+import { riskLevelStyle } from '../ui/styles'
 import { RULE_VERSION, HEALTH_WEIGHTS } from '../engine/health'
+import { buildTrendSeries } from '../engine/trend'
+import { SignalType } from '../types'
 
 const DIM_LABEL: Record<string, string> = {
   usage: '使用与运营活跃度',
@@ -16,6 +19,24 @@ const DIM_LABEL: Record<string, string> = {
   inquiry: '询盘与转化',
   contract: '合同与续费阶段',
   action: '动作与结果反馈',
+}
+
+const SIGNAL_CATEGORY: Record<SignalType, { label: string; accent: string; tint: string }> = {
+  运营停滞: { label: '账户信号', accent: '#4a3aa7', tint: '#f2f0fb' },
+  流量下滑: { label: '网站状态', accent: '#2a78d6', tint: '#eef4fc' },
+  询盘异常: { label: '网站状态', accent: '#2a78d6', tint: '#eef4fc' },
+  同行落后: { label: '同行对标', accent: '#c14fa0', tint: '#fbeef8' },
+  续费窗口临近: { label: '续费阶段', accent: '#c98500', tint: '#fdf3e0' },
+  持续价值: { label: '价值信号', accent: '#0f8c5f', tint: '#eaf8f1' },
+  触达未回复: { label: '跟进状态', accent: '#898781', tint: '#f4f3f1' },
+  优化未见效: { label: '跟进状态', accent: '#898781', tint: '#f4f3f1' },
+}
+
+function actionTag(type: SignalType, confidence: '高' | '中' | '低') {
+  if (type === '持续价值') return { text: '价值确认', bg: '#eaf8f1', color: '#0f8c5f' }
+  if (confidence === '高') return { text: '优先处理', bg: '#fdece9', color: '#d03b3b' }
+  if (confidence === '中') return { text: '已识别', bg: '#fef3da', color: '#c98500' }
+  return { text: '持续观察', bg: '#f1f0ee', color: '#898781' }
 }
 
 const SENTIMENT_LABEL: Record<string, { text: string; className: string }> = {
@@ -41,6 +62,18 @@ export default function CustomerDetail() {
     () => (customer ? computeSentimentTrend(customer.id, state.actions) : null),
     [customer, state.actions],
   )
+
+  const trend = useMemo(() => {
+    if (!customer || !view) return null
+    const hasInquiryIssue = view.signals.some((s) => s.type === '询盘异常')
+    const preferInquiry = hasInquiryIssue && !view.signals.some((s) => s.type === '流量下滑' || s.type === '持续价值')
+    const pct = preferInquiry ? customer.metrics.inquiryTrendPct : customer.metrics.trafficTrendPct
+    return {
+      label: preferInquiry ? '询盘量' : '网站访问量',
+      pct,
+      series: buildTrendSeries(pct),
+    }
+  }, [customer, view])
 
   if (!customer || !view) {
     return (
@@ -121,38 +154,62 @@ export default function CustomerDetail() {
           </div>
         </div>
 
-        {/* Agent 解释 */}
+        {/* Agent 证据画布 */}
         <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="text-sm font-semibold text-slate-800">Agent 判断解释</h2>
-          <p className="mt-0.5 text-[11px] text-slate-400">规则版本：{RULE_VERSION}</p>
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-slate-800">Agent 证据画布</h2>
+            <span className="text-[11px] text-slate-400">{view.signals.length} 类来源 · 规则版本 {RULE_VERSION}</span>
+          </div>
 
+          {view.signals.length === 0 ? (
+            <p className="mt-3 text-sm text-slate-400">未发现需要关注的信号</p>
+          ) : (
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {view.signals.map((s) => {
+                const cat = SIGNAL_CATEGORY[s.type]
+                const tag = actionTag(s.type, s.confidence)
+                return (
+                  <div
+                    key={s.id}
+                    className="rounded-2xl border border-slate-100 p-4"
+                    style={{ background: cat.tint }}
+                  >
+                    <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: cat.accent }}>
+                      {cat.label}
+                    </span>
+                    <p className="mt-1.5 text-base font-semibold leading-snug text-slate-800">{s.type}</p>
+                    <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{s.text}</p>
+                    <div className="mt-3 flex items-center justify-between">
+                      <span className="text-[11px] text-slate-400">证据：{s.evidence}</span>
+                    </div>
+                    <span
+                      className="mt-2 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium"
+                      style={{ background: tag.bg, color: tag.color }}
+                    >
+                      {tag.text}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {trend && <TrendBars series={trend.series} label={trend.label} trendPct={trend.pct} />}
+
+        {/* Agent 结论 */}
+        <div className="rounded-xl border border-slate-200 bg-white p-5">
+          <h2 className="text-sm font-semibold text-slate-800">Agent 判断结论</h2>
           <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <h3 className="text-xs font-medium text-slate-500">事实（来自数据信号）</h3>
-              <ul className="mt-1.5 space-y-1 text-sm text-slate-600">
-                {view.signals.length === 0 && <li className="text-slate-400">未发现需要关注的信号</li>}
-                {view.signals.map((s) => (
-                  <li key={s.id} className="rounded-lg bg-slate-50 px-3 py-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-slate-700">{s.type}</span>
-                      <span className={`text-[11px] font-medium ${confidenceStyle[s.confidence]}`}>置信度：{s.confidence}</span>
-                    </div>
-                    <p className="mt-0.5 text-xs text-slate-500">{s.text}</p>
-                    <p className="mt-0.5 text-[11px] text-slate-400">证据：{s.evidence}</p>
-                    <p className="text-[11px] text-slate-400">{s.baseline}</p>
-                  </li>
+              <h3 className="text-xs font-medium text-slate-500">推断（Agent 结论）</h3>
+              <ul className="mt-1.5 list-disc space-y-0.5 pl-4 text-sm text-slate-600">
+                {view.health.factors.map((f, i) => (
+                  <li key={i}>{f}</li>
                 ))}
               </ul>
             </div>
             <div className="space-y-3">
-              <div>
-                <h3 className="text-xs font-medium text-slate-500">推断（Agent 结论）</h3>
-                <ul className="mt-1.5 list-disc space-y-0.5 pl-4 text-sm text-slate-600">
-                  {view.health.factors.map((f, i) => (
-                    <li key={i}>{f}</li>
-                  ))}
-                </ul>
-              </div>
               {view.crossInsights.length > 0 && (
                 <div>
                   <h3 className="text-xs font-medium text-slate-500">交叉推理（多个信号如何互相印证）</h3>
