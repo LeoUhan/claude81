@@ -2,18 +2,20 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Sparkles } from 'lucide-react'
 import { CustomerView } from '../engine/selectors'
-import { Link } from 'react-router-dom'
+import { useAgent } from '../store/AgentContext'
 
 const steps = ['信号扫描', '证据关联', '风险判断', '动作建议']
 
 export default function AgentPanel({ views }: { views: CustomerView[] }) {
+  const { openDrawer } = useAgent()
   const insights = views
     .filter((v) => v.health.level !== '稳定')
     .slice(0, 6)
     .map((v) => ({
       id: v.customer.id,
       name: v.customer.name,
-      text: `健康度 ${v.health.score} 分（${v.health.level}）· ${v.health.factors[0]}`,
+      shortName: v.customer.name.replace(/^\S+\s*/, ''),
+      text: `流失概率 ${v.churnProbability}%（${v.health.level}）· ${v.health.factors[0]}`,
     }))
 
   const [stepIndex, setStepIndex] = useState(0)
@@ -47,14 +49,14 @@ export default function AgentPanel({ views }: { views: CustomerView[] }) {
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
               持续分析中
             </span>
-            <Link
-              to="/agent"
+            <button
+              onClick={() => openDrawer()}
               className="ml-auto flex items-center gap-1 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-3 py-1 text-[11px] font-medium text-white transition hover:opacity-90"
             >
               与 Agent 对话 →
-            </Link>
+            </button>
           </div>
-          <p className="mt-0.5 text-xs text-slate-400">已接入 12 家客户 · 7 类数据源 · 本周期实时评估</p>
+          <p className="mt-0.5 text-xs text-slate-400">已接入 12 家客户 · 8 类数据源（含同行业对标）· 本周期实时评估</p>
 
           <div className="mt-3 min-h-[40px]">
             <AnimatePresence mode="wait">
@@ -65,14 +67,14 @@ export default function AgentPanel({ views }: { views: CustomerView[] }) {
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.25 }}
               >
-                <Link
-                  to={`/customers/${current.id}`}
-                  className="block rounded-lg bg-slate-50 px-3.5 py-2.5 text-sm text-slate-600 transition hover:bg-violet-50"
+                <button
+                  onClick={() => openDrawer(`帮我看看 ${current.shortName}`)}
+                  className="block w-full rounded-lg bg-slate-50 px-3.5 py-2.5 text-left text-sm text-slate-600 transition hover:bg-violet-50"
                 >
                   <span className="font-medium text-slate-800">{current.name}</span>
                   <span className="mx-1.5 text-slate-300">·</span>
                   {current.text}
-                </Link>
+                </button>
               </motion.div>
             </AnimatePresence>
           </div>

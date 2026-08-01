@@ -15,7 +15,7 @@ const trendColor = { down: 'text-rose-500', flat: 'text-slate-400', up: 'text-em
 const trendText = { down: '走弱', flat: '平稳', up: '走强' }
 
 export default function CustomerCard({ view }: { view: CustomerView }) {
-  const { customer: c, health } = view
+  const { customer: c, health, churnProbability } = view
   const style = riskLevelStyle[health.level]
   const trend = trendOf(c.metrics.trafficTrendPct)
   const TrendIcon = trendIcon[trend]
@@ -37,6 +37,7 @@ export default function CustomerCard({ view }: { view: CustomerView }) {
           <p className="mt-0.5 text-[11px] text-slate-400">
             {c.industry} · {c.region} · {c.owner}
           </p>
+          <p className="mt-1 text-[11px] font-medium text-rose-500">流失概率 {churnProbability}%</p>
         </div>
         <HealthRing value={health.score} size={44} stroke={5} />
       </div>

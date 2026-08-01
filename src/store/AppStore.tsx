@@ -39,7 +39,7 @@ type Action =
   | { kind: 'SCAN' }
   | { kind: 'APPROVE'; actionId: string }
   | { kind: 'EXECUTE'; actionId: string }
-  | { kind: 'REPLY'; actionId: string; intent: string; text: string }
+  | { kind: 'REPLY'; actionId: string; intent: string; text: string; sentiment: number }
   | { kind: 'REVIEW'; actionId: string; outcome: 'improved' | 'no-change' | 'escalate' }
   | { kind: 'CANCEL'; actionId: string; reason: string }
   | { kind: 'REGENERATE'; actionId: string; content: string }
@@ -90,7 +90,7 @@ function reducer(state: State, action: Action): State {
           ? {
               ...a,
               status: '已收到结果' as const,
-              customerReply: { at: now, text: action.text, intent: action.intent },
+              customerReply: { at: now, text: action.text, intent: action.intent, sentiment: action.sentiment },
               history: [...a.history, { at: now, note: `收到客户回复：${action.intent}` }],
             }
           : a,

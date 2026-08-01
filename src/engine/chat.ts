@@ -1,6 +1,6 @@
 import { ActionRecord, CustomerRecord, EventLogItem } from '../types'
 import { customerSeed } from '../data/seed'
-import { buildCustomerView, priorityRank } from './selectors'
+import { buildCustomerView, computeSentimentTrend, priorityRank } from './selectors'
 import { generateActionsForCustomer } from './actions'
 import { computeEfficiency } from './efficiency'
 
@@ -33,8 +33,30 @@ function findCustomer(text: string): CustomerRecord | undefined {
 
 const ACTIVE_STATUSES = new Set(['待确认', '已批准', '等待客户结果', '已收到结果'])
 
+const SENTIMENT_LABEL: Record<string, string> = {
+  improving: '较上次好转',
+  worsening: '较上次恶化',
+  flat: '基本持平',
+  insufficient: '样本不足，暂无趋势',
+}
+
 export function answerQuery(text: string, actions: ActionRecord[], events: EventLogItem[], ownerScope: string | null = null): ChatAnswer {
   const scopedCustomers = ownerScope ? customerSeed.filter((c) => c.owner === ownerScope) : customerSeed
+
+  const actionMatch = text.match(/处理动作\s*(act-\S+)/)
+  if (actionMatch) {
+    const action = actions.find((a) => a.id === actionMatch[1])
+    const customer = action ? customerSeed.find((c) => c.id === action.customerId) : undefined
+    if (action && customer) {
+      return {
+        text: `我们来看一下「${action.purpose}」这个动作——针对 ${customer.name}，触发原因：${action.triggerReason}。当前状态：${action.status}。你可以在下方卡片里继续操作，或者直接跟我说想怎么调整。`,
+        customerId: customer.id,
+        existingActionId: action.id,
+        suggestions: DEFAULT_SUGGESTIONS,
+      }
+    }
+  }
+
   const customer = findCustomer(text)
 
   if (customer) {
@@ -48,7 +70,7 @@ export function answerQuery(text: string, actions: ActionRecord[], events: Event
     const views = priorityRank(scopedCustomers.map((c) => buildCustomerView(c, actions))).filter((v) => v.health.level !== '稳定')
     const top = views.slice(0, 4)
     const lines = top
-      .map((v, i) => `${i + 1}. ${v.customer.name}（健康度 ${v.health.score}，${v.health.level}）— ${v.health.factors[0]}`)
+      .map((v, i) => `${i + 1}. ${v.customer.name}（流失概率 ${v.churnProbability}%，${v.health.level}）— ${v.health.factors[0]}`)
       .join('\n')
     return {
       text: top.length
@@ -88,16 +110,22 @@ function answerAboutCustomer(customer: CustomerRecord, actions: ActionRecord[]):
   const view = buildCustomerView(customer, actions)
   const mine = actions.filter((a) => a.customerId === customer.id)
   const active = mine.find((a) => ACTIVE_STATUSES.has(a.status))
+  const sentiment = computeSentimentTrend(customer.id, actions)
 
   const factLines = view.signals.length
     ? view.signals.map((s) => `- ${s.text}（${s.evidence}）`).join('\n')
     : '- 未发现明显异常信号'
 
-  const header = `${customer.name}：健康度 ${view.health.score} 分（${view.health.level}），距合同到期 ${customer.daysToRenewal} 天。`
+  const crossLine = view.crossInsights.length ? `\n\n交叉推理：${view.crossInsights.join('；')}` : ''
+  const sentimentLine = sentiment
+    ? `\n客户情感倾向：最近一次「${sentiment.latestIntent}」，情感分 ${sentiment.latest.toFixed(1)}（${SENTIMENT_LABEL[sentiment.trend]}）`
+    : ''
+
+  const header = `${customer.name}：流失概率 ${view.churnProbability}%（健康度 ${view.health.score} 分，${view.health.level}），距合同到期 ${customer.daysToRenewal} 天。${sentimentLine}`
 
   if (active) {
     return {
-      text: `${header}\n\n已有进行中的动作「${active.purpose}」，当前状态：${active.status}。你可以在下方卡片里直接操作。`,
+      text: `${header}\n\n已有进行中的动作「${active.purpose}」，当前状态：${active.status}。你可以在下方卡片里直接操作。${crossLine}`,
       customerId: customer.id,
       existingActionId: active.id,
       suggestions: DEFAULT_SUGGESTIONS,
@@ -116,7 +144,7 @@ function answerAboutCustomer(customer: CustomerRecord, actions: ActionRecord[]):
   const draft = drafts[0]
 
   return {
-    text: `${header}\n\n识别到以下信号：\n${factLines}\n\n${
+    text: `${header}\n\n识别到以下信号：\n${factLines}${crossLine}\n\n${
       draft ? `建议动作：${draft.purpose}。我已经生成了文案草稿，你可以直接确认执行、重新生成或编辑。` : '暂无需要新生成的动作。'
     }`,
     customerId: customer.id,

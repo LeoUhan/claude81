@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import Topbar from '../components/Topbar'
-import ActionCard from '../components/ActionCard'
+import ActionSummaryCard from '../components/ActionSummaryCard'
 import { useAppStore, customerSeed } from '../store/AppStore'
 import { useRole } from '../store/RoleContext'
 import { ActionStatus } from '../types'
@@ -60,7 +60,7 @@ export default function Actions() {
         ) : (
           <div className="space-y-3">
             {scoped.map((a) => (
-              <ActionCard key={a.id} action={a} customerName={customerById.get(a.customerId)?.name} />
+              <ActionSummaryCard key={a.id} action={a} customerName={customerById.get(a.customerId)?.name} />
             ))}
           </div>
         )}

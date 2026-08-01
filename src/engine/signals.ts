@@ -1,4 +1,5 @@
 import { ActionRecord, CustomerRecord, SignalEvent } from '../types'
+import { peerBenchmarks } from '../data/peers'
 
 let counter = 0
 function sid(customerId: string) {
@@ -78,6 +79,28 @@ export function buildMetricSignals(c: CustomerRecord): SignalEvent[] {
       confidence: '高',
       detectedAt: now(),
     })
+  }
+
+  const peer = peerBenchmarks.find((p) => p.industry === c.industry)
+  if (peer) {
+    const missingCerts = peer.certifications.filter((cert) => !m.certifications.includes(cert))
+    const caseGap = peer.caseStudyCount - m.caseStudyCount
+    if (missingCerts.length > 0 || caseGap >= 3) {
+      const parts = [
+        missingCerts.length ? `缺少 ${missingCerts.join('、')} 等认证` : '',
+        caseGap >= 3 ? `案例数量比同行少 ${caseGap} 个` : '',
+      ].filter(Boolean)
+      signals.push({
+        id: sid(c.id),
+        customerId: c.id,
+        type: '同行落后',
+        text: `同行业对标发现内容落后：${parts.join('，')}`,
+        evidence: `对标对象：${peer.peerName}（${peer.note}）；认证：本方 [${m.certifications.join('、') || '无'}] vs 同行 [${peer.certifications.join('、')}]；案例数：本方 ${m.caseStudyCount} vs 同行 ${peer.caseStudyCount}`,
+        baseline: '基线：同行业公开内容抽样对比（构造样例，正式产品需替换为授权抓取结果）',
+        confidence: '中',
+        detectedAt: now(),
+      })
+    }
   }
 
   return signals

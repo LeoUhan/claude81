@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
+import AgentDrawer from './AgentDrawer'
 
 export default function Layout() {
   return (
@@ -8,6 +9,7 @@ export default function Layout() {
       <div className="min-w-0 flex-1">
         <Outlet />
       </div>
+      <AgentDrawer />
     </div>
   )
 }

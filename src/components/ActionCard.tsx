@@ -5,12 +5,12 @@ import { actionStatusStyle } from '../ui/styles'
 import { useAppStore } from '../store/AppStore'
 import { useRole } from '../store/RoleContext'
 
-const REPLY_INTENTS: { intent: string; text: string }[] = [
-  { intent: '积极意向', text: '好的，麻烦帮我们看看，我们也想把网站利用起来。' },
-  { intent: '观望', text: '再看看吧，最近这块不是我们重点。' },
-  { intent: '异议', text: '说实话感觉最近效果一般，这个费用是不是有点高了。' },
-  { intent: '投诉升级', text: '之前反馈的问题一直没解决，这次服务让我们很不满意。' },
-  { intent: '技术问题', text: '后台登录一直报错，麻烦帮忙看一下。' },
+const REPLY_INTENTS: { intent: string; text: string; sentiment: number }[] = [
+  { intent: '积极意向', text: '好的，麻烦帮我们看看，我们也想把网站利用起来。', sentiment: 0.8 },
+  { intent: '观望', text: '再看看吧，最近这块不是我们重点。', sentiment: 0 },
+  { intent: '异议', text: '说实话感觉最近效果一般，这个费用是不是有点高了。', sentiment: -0.4 },
+  { intent: '投诉升级', text: '之前反馈的问题一直没解决，这次服务让我们很不满意。', sentiment: -0.9 },
+  { intent: '技术问题', text: '后台登录一直报错，麻烦帮忙看一下。', sentiment: -0.2 },
 ]
 
 const REGEN_SUFFIXES = ['（更简洁的版本）', '（更强调数据依据的版本）', '（更委婉的版本）']
@@ -128,7 +128,7 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
                   <button
                     key={r.intent}
                     onClick={() => {
-                      dispatch({ kind: 'REPLY', actionId: action.id, intent: r.intent, text: r.text })
+                      dispatch({ kind: 'REPLY', actionId: action.id, intent: r.intent, text: r.text, sentiment: r.sentiment })
                       setShowReply(false)
                     }}
                     className="rounded-full border border-slate-200 px-2.5 py-1 text-[11px] text-slate-600 hover:border-violet-300 hover:bg-violet-50"

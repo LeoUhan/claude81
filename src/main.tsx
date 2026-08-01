@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { AppStoreProvider } from './store/AppStore'
 import { RoleProvider } from './store/RoleContext'
+import { AgentProvider } from './store/AgentContext'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -11,7 +12,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <RoleProvider>
         <AppStoreProvider>
-          <App />
+          <AgentProvider>
+            <App />
+          </AgentProvider>
         </AppStoreProvider>
       </RoleProvider>
     </BrowserRouter>

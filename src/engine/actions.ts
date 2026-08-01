@@ -79,15 +79,17 @@ export function generateActionsForCustomer(
     )
   }
 
-  if (types.has('流量下滑') && !hasActive(existing, c.id, '页面优化')) {
+  if ((types.has('流量下滑') || types.has('同行落后')) && !hasActive(existing, c.id, '页面优化')) {
+    const trafficSignal = signals.find((s) => s.type === '流量下滑')
+    const peerSignal = signals.find((s) => s.type === '同行落后')
     drafts.push(
       base(c.id, {
         type: '页面优化',
         purpose: '优化重点页面结构与关键词，恢复访问表现',
-        triggerReason: `检测到流量下滑：${signals.find((s) => s.type === '流量下滑')?.text}`,
+        triggerReason: [trafficSignal?.text, peerSignal?.text].filter(Boolean).join('；'),
         target: `${c.domain} 产品/案例页`,
         channel: '内容发布系统',
-        content: `建议：补充 ${c.industry} 行业采购关键词、更新近 6 个月内的案例和认证信息、检查移动端加载速度。草稿需授权人员确认后发布。`,
+        content: `建议：补充 ${c.industry} 行业采购关键词、更新近 6 个月内的案例和认证信息、检查移动端加载速度。${peerSignal ? '同行业已具备相关认证/案例，建议优先补齐这部分内容短板。' : ''}草稿需授权人员确认后发布。`,
         owner: c.owner,
         needsApproval: true,
         deadline: inDays(5),

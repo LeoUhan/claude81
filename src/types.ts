@@ -8,6 +8,8 @@ export interface RawMetrics {
   inquiryTrendPct: number // 相比上一周期的询盘变化 %
   inquiryValid: boolean // 表单/询盘入口是否正常
   renewalHistory: '首次合作' | '已续费' | '曾降级'
+  certifications: string[] // 网站已展示的认证
+  caseStudyCount: number // 网站已展示的案例数
 }
 
 export interface CustomerRecord {
@@ -47,6 +49,7 @@ export type SignalType =
   | '触达未回复'
   | '持续价值'
   | '优化未见效'
+  | '同行落后'
 
 export interface SignalEvent {
   id: string
@@ -97,7 +100,7 @@ export interface ActionRecord {
   expectedMetric: string
   risk: string
   history: { at: string; note: string }[]
-  customerReply?: { at: string; text: string; intent: string }
+  customerReply?: { at: string; text: string; intent: string; sentiment: number }
   reviewOutcome?: 'improved' | 'no-change' | 'escalate'
 }
 
