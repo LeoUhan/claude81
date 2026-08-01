@@ -1,16 +1,19 @@
 import { NavLink } from 'react-router-dom'
 import { LayoutGrid, ListChecks, ShieldCheck, Sparkles, TrendingUp, Users, SlidersHorizontal } from 'lucide-react'
+import { useRole } from '../store/RoleContext'
 
 const nav = [
-  { to: '/agent', label: 'Agent 对话', icon: Sparkles, highlight: true },
-  { to: '/', label: '工作台', icon: LayoutGrid, end: true },
-  { to: '/customers', label: '客户', icon: Users },
-  { to: '/actions', label: '动作中心', icon: ListChecks },
-  { to: '/efficiency', label: '效能复盘', icon: TrendingUp },
-  { to: '/settings', label: '规则与设置', icon: SlidersHorizontal },
+  { to: '/agent', label: 'Agent 对话', icon: Sparkles, highlight: true, roles: null },
+  { to: '/', label: '工作台', icon: LayoutGrid, end: true, roles: null },
+  { to: '/customers', label: '客户', icon: Users, roles: null },
+  { to: '/actions', label: '动作中心', icon: ListChecks, roles: null },
+  { to: '/efficiency', label: '效能复盘', icon: TrendingUp, roles: ['客户成功主管', '系统管理员'] as const },
+  { to: '/settings', label: '规则与设置', icon: SlidersHorizontal, roles: ['系统管理员'] as const },
 ]
 
 export default function Sidebar() {
+  const { role } = useRole()
+  const visibleNav = nav.filter((item) => !item.roles || (item.roles as readonly string[]).includes(role))
   return (
     <aside className="hidden w-56 shrink-0 flex-col border-r border-slate-200 bg-white px-3 py-5 md:flex">
       <div className="mb-6 flex items-center gap-2 px-2">
@@ -24,7 +27,7 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex flex-col gap-0.5">
-        {nav.map((item, i) => (
+        {visibleNav.map((item, i) => (
           <div key={item.to}>
             {i === 1 && <div className="my-1.5 border-t border-slate-100" />}
             <NavLink

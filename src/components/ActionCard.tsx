@@ -3,6 +3,7 @@ import { CheckCircle2, Clock, RefreshCcw, ShieldAlert, XCircle } from 'lucide-re
 import { ActionRecord } from '../types'
 import { actionStatusStyle } from '../ui/styles'
 import { useAppStore } from '../store/AppStore'
+import { useRole } from '../store/RoleContext'
 
 const REPLY_INTENTS: { intent: string; text: string }[] = [
   { intent: '积极意向', text: '好的，麻烦帮我们看看，我们也想把网站利用起来。' },
@@ -16,6 +17,7 @@ const REGEN_SUFFIXES = ['（更简洁的版本）', '（更强调数据依据的
 
 export default function ActionCard({ action, customerName }: { action: ActionRecord; customerName?: string }) {
   const { dispatch } = useAppStore()
+  const { canApprove } = useRole()
   const [showReply, setShowReply] = useState(false)
   const [showReview, setShowReview] = useState(false)
   const style = actionStatusStyle[action.status]
@@ -58,7 +60,17 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
         </div>
       )}
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      {!canApprove && !['已完成', '已取消'].includes(action.status) && (
+        <div className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-400">
+          系统管理员无业务审批权限，需由 CSM / 销售 / 主管确认执行。
+        </div>
+      )}
+
+      <div
+        className={`mt-3 flex flex-wrap items-center gap-2 ${
+          !canApprove && !['已完成', '已取消'].includes(action.status) ? 'hidden' : ''
+        }`}
+      >
         {action.status === '待确认' && (
           <>
             <button
