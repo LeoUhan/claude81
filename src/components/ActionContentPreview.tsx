@@ -1,5 +1,6 @@
 import { ActionRecord } from '../types'
 import { customerSeed } from '../data/seed'
+import peerReferenceImg from '../assets/peer-reference-encrea.webp'
 
 function parseChecklist(content: string): string[] {
   const parts = content
@@ -35,6 +36,7 @@ export default function ActionContentPreview({ action }: { action: ActionRecord 
   }
 
   if (action.type === '页面优化') {
+    const hasPeerReason = action.triggerReason.includes('同行')
     return (
       <div className="overflow-hidden rounded-xl border border-slate-200">
         <div className="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1.5">
@@ -44,6 +46,16 @@ export default function ActionContentPreview({ action }: { action: ActionRecord 
           <span className="ml-1 flex-1 truncate rounded bg-white px-2 py-0.5 text-[10px] text-slate-400">{action.target}</span>
         </div>
         <div className="px-3.5 py-3 text-sm leading-relaxed text-slate-600">{action.content}</div>
+        {hasPeerReason && (
+          <div className="border-t border-slate-100 bg-slate-50/60 px-3.5 py-3">
+            <a href={peerReferenceImg} target="_blank" rel="noreferrer" className="block overflow-hidden rounded-lg border border-slate-200">
+              <img src={peerReferenceImg} alt="同行业真实企业官网参考" className="max-h-40 w-full object-cover object-top" />
+            </a>
+            <p className="mt-1.5 text-[11px] text-slate-400">
+              同行业结构参考：英科镭（ENCREA）官网解决方案页 · 真实网站截图，用于参考页面信息结构，非本客户直接竞争对手
+            </p>
+          </div>
+        )}
       </div>
     )
   }
