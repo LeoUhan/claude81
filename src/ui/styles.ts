@@ -1,4 +1,4 @@
-import { ActionStatus, RiskLevel } from '../types'
+import { ActionStatus, ActionType, RiskLevel } from '../types'
 
 export const riskLevelStyle: Record<RiskLevel, { text: string; bg: string; dot: string }> = {
   高风险: { text: 'text-rose-600', bg: 'bg-rose-50', dot: 'bg-rose-500' },
@@ -22,4 +22,13 @@ export const confidenceStyle: Record<'高' | '中' | '低', string> = {
   高: 'text-emerald-600',
   中: 'text-amber-600',
   低: 'text-slate-400',
+}
+
+export const actionTypeStyle: Record<ActionType, { badgeBg: string; badgeText: string; accent: string }> = {
+  客户触达: { badgeBg: 'bg-blue-100', badgeText: 'text-blue-700', accent: '#2563eb' },
+  页面优化: { badgeBg: 'bg-violet-100', badgeText: 'text-violet-700', accent: '#7c3aed' },
+  询盘修复: { badgeBg: 'bg-rose-100', badgeText: 'text-rose-700', accent: '#dc2626' },
+  续费复盘: { badgeBg: 'bg-amber-100', badgeText: 'text-amber-800', accent: '#b45309' },
+  回复处理: { badgeBg: 'bg-slate-100', badgeText: 'text-slate-600', accent: '#475569' },
+  复查: { badgeBg: 'bg-slate-100', badgeText: 'text-slate-600', accent: '#475569' },
 }

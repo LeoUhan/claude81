@@ -110,7 +110,7 @@ export default function CustomerDetail() {
         </div>
 
         {/* 概览 */}
-        <div className="grid grid-cols-1 gap-4 rounded-xl border border-slate-200 bg-white p-5 md:grid-cols-[auto_1fr]">
+        <div className="flex flex-wrap items-center gap-6 rounded-xl border border-slate-200 bg-white p-5">
           <div className="flex items-center gap-4">
             <HealthRing value={view.health.score} size={72} stroke={7} />
             <div>
@@ -131,23 +131,20 @@ export default function CustomerDetail() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="flex flex-1 flex-wrap gap-5">
             {(Object.keys(HEALTH_WEIGHTS) as Array<keyof typeof HEALTH_WEIGHTS>).map((k) => {
               const v = view.health.subScores[k]
               return (
-                <div key={k}>
-                  <div className="flex justify-between text-[11px] text-slate-400">
-                    <span>
-                      {DIM_LABEL[k]} <span className="text-slate-300">({Math.round(HEALTH_WEIGHTS[k] * 100)}%)</span>
-                    </span>
-                    <span className="font-medium text-slate-600">{v === null ? '缺失数据' : v}</span>
-                  </div>
-                  <div className="mt-1 h-1.5 rounded-full bg-slate-100">
-                    <div
-                      className={`h-1.5 rounded-full ${v === null ? 'bg-slate-200' : v < 50 ? 'bg-rose-400' : v < 80 ? 'bg-amber-400' : 'bg-emerald-400'}`}
-                      style={{ width: `${v ?? 0}%` }}
-                    />
-                  </div>
+                <div key={k} className="flex w-20 flex-col items-center text-center">
+                  {v === null ? (
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-slate-200 text-xs text-slate-300">
+                      缺失
+                    </div>
+                  ) : (
+                    <HealthRing value={v} size={56} stroke={6} />
+                  )}
+                  <span className="mt-1.5 text-[10.5px] leading-tight text-slate-500">{DIM_LABEL[k]}</span>
+                  <span className="text-[10px] text-slate-300">权重 {Math.round(HEALTH_WEIGHTS[k] * 100)}%</span>
                 </div>
               )
             })}

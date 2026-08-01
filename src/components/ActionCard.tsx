@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { CheckCircle2, Clock, RefreshCcw, ShieldAlert, XCircle } from 'lucide-react'
 import { ActionRecord } from '../types'
-import { actionStatusStyle } from '../ui/styles'
+import { actionStatusStyle, actionTypeStyle } from '../ui/styles'
 import { useAppStore } from '../store/AppStore'
 import { useRole } from '../store/RoleContext'
+import ActionContentPreview from './ActionContentPreview'
 
 const REPLY_INTENTS: { intent: string; text: string; sentiment: number }[] = [
   { intent: '积极意向', text: '好的，麻烦帮我们看看，我们也想把网站利用起来。', sentiment: 0.8 },
@@ -21,6 +22,7 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
   const [showReply, setShowReply] = useState(false)
   const [showReview, setShowReview] = useState(false)
   const style = actionStatusStyle[action.status]
+  const typeStyle = actionTypeStyle[action.type]
   const [regenN, setRegenN] = useState(0)
 
   function regenerate() {
@@ -32,7 +34,7 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">{action.type}</span>
+        <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${typeStyle.badgeBg} ${typeStyle.badgeText}`}>{action.type}</span>
         <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${style.bg} ${style.text}`}>{action.status}</span>
         {customerName && <span className="text-xs text-slate-400">{customerName}</span>}
         <span className="ml-auto flex items-center gap-1 text-[11px] text-slate-400">
@@ -44,7 +46,9 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
       <p className="mt-2 text-sm font-medium text-slate-800">{action.purpose}</p>
       <p className="mt-1 text-xs text-slate-400">触发原因：{action.triggerReason}</p>
 
-      <div className="mt-2 rounded-lg bg-slate-50 p-3 text-sm leading-relaxed text-slate-600">{action.content}</div>
+      <div className="mt-2">
+        <ActionContentPreview action={action} />
+      </div>
 
       <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-slate-400 sm:grid-cols-4">
         <div>目标对象：{action.target}</div>
@@ -75,7 +79,8 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
           <>
             <button
               onClick={() => dispatch({ kind: 'APPROVE', actionId: action.id })}
-              className="flex items-center gap-1 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-violet-700"
+              className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-white opacity-95 hover:opacity-100"
+              style={{ background: typeStyle.accent }}
             >
               <CheckCircle2 size={13} />
               人工确认授权
@@ -101,7 +106,8 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
         {action.status === '已批准' && (
           <button
             onClick={() => dispatch({ kind: 'EXECUTE', actionId: action.id })}
-            className="rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-sky-700"
+            className="rounded-lg px-3 py-1.5 text-xs font-medium text-white opacity-95 hover:opacity-100"
+            style={{ background: typeStyle.accent }}
           >
             执行动作
           </button>
