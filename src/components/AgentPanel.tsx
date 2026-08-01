@@ -47,6 +47,12 @@ export default function AgentPanel({ views }: { views: CustomerView[] }) {
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
               持续分析中
             </span>
+            <Link
+              to="/agent"
+              className="ml-auto flex items-center gap-1 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-3 py-1 text-[11px] font-medium text-white transition hover:opacity-90"
+            >
+              与 Agent 对话 →
+            </Link>
           </div>
           <p className="mt-0.5 text-xs text-slate-400">已接入 12 家客户 · 7 类数据源 · 本周期实时评估</p>
 

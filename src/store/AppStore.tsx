@@ -44,6 +44,7 @@ type Action =
   | { kind: 'CANCEL'; actionId: string; reason: string }
   | { kind: 'REGENERATE'; actionId: string; content: string }
   | { kind: 'EDIT'; actionId: string; content: string }
+  | { kind: 'ADD_ACTION'; action: ActionRecord }
   | { kind: 'RESET' }
 
 function updateAction(state: State, id: string, fn: (a: ActionRecord) => ActionRecord): State {
@@ -139,6 +140,13 @@ function reducer(state: State, action: Action): State {
         content: action.content,
         history: [...a.history, { at: now, note: '负责人已手动修改文案' }],
       }))
+
+    case 'ADD_ACTION': {
+      if (state.actions.some((a) => a.id === action.action.id)) return state
+      const events = [...state.events]
+      logEvent(events, 'action_created', `Agent 对话生成动作：${action.action.purpose}`, action.action.customerId, action.action.id)
+      return { ...state, actions: [...state.actions, action.action], events }
+    }
 
     case 'RESET':
       localStorage.removeItem(STORAGE_KEY)

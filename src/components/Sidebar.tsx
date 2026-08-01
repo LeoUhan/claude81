@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutGrid, ListChecks, ShieldCheck, TrendingUp, Users, SlidersHorizontal } from 'lucide-react'
+import { LayoutGrid, ListChecks, ShieldCheck, Sparkles, TrendingUp, Users, SlidersHorizontal } from 'lucide-react'
 
 const nav = [
+  { to: '/agent', label: 'Agent 对话', icon: Sparkles, highlight: true },
   { to: '/', label: '工作台', icon: LayoutGrid, end: true },
   { to: '/customers', label: '客户', icon: Users },
   { to: '/actions', label: '动作中心', icon: ListChecks },
@@ -23,20 +24,28 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex flex-col gap-0.5">
-        {nav.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            className={({ isActive }) =>
-              `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition ${
-                isActive ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
-              }`
-            }
-          >
-            <item.icon size={17} />
-            {item.label}
-          </NavLink>
+        {nav.map((item, i) => (
+          <div key={item.to}>
+            {i === 1 && <div className="my-1.5 border-t border-slate-100" />}
+            <NavLink
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) =>
+                `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                  isActive
+                    ? item.highlight
+                      ? 'bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-sm'
+                      : 'bg-violet-50 text-violet-700'
+                    : item.highlight
+                      ? 'text-violet-600 hover:bg-violet-50'
+                      : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                }`
+              }
+            >
+              <item.icon size={17} />
+              {item.label}
+            </NavLink>
+          </div>
         ))}
       </nav>
 

@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
+import AgentChat from './pages/AgentChat'
 import Customers from './pages/Customers'
 import CustomerDetail from './pages/CustomerDetail'
 import Actions from './pages/Actions'
@@ -12,6 +13,7 @@ function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/agent" element={<AgentChat />} />
         <Route path="/customers" element={<Customers />} />
         <Route path="/customers/:id" element={<CustomerDetail />} />
         <Route path="/actions" element={<Actions />} />
