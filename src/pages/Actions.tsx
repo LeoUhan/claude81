@@ -37,7 +37,7 @@ export default function Actions() {
 
   return (
     <>
-      <Topbar title="动作中心" subtitle="跨客户的动作队列，覆盖生成→确认→执行→复查全生命周期" />
+      <Topbar title="执行中心" subtitle="跨客户的动作队列，覆盖生成→确认→执行→复查全生命周期" />
       <main className="mx-auto max-w-6xl space-y-4 px-6 py-6">
         <div className="flex flex-wrap gap-1.5">
           {counts.map(({ status, n }) => (

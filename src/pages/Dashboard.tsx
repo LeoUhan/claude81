@@ -33,7 +33,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <Topbar title="工作台" subtitle="客户价值总览与 Agent 实时分析" />
+      <Topbar title="监测总览" subtitle="客户价值总览与 Agent 实时分析" />
       <main className="mx-auto max-w-7xl space-y-6 px-6 py-6">
         <AgentHero
           monitoredCount={views.length}

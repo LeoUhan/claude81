@@ -14,7 +14,7 @@ export default function Topbar({ title, subtitle }: { title: string; subtitle?: 
   }
 
   return (
-    <header className="flex items-center justify-between border-b border-slate-200 bg-white/80 px-6 py-4 backdrop-blur">
+    <header className="relative z-30 flex items-center justify-between border-b border-slate-200 bg-white/80 px-6 py-4 backdrop-blur">
       <div>
         <h1 className="text-lg font-semibold text-slate-800">{title}</h1>
         {subtitle && <p className="mt-0.5 text-xs text-slate-400">{subtitle}</p>}

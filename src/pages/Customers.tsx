@@ -22,7 +22,7 @@ export default function Customers() {
 
   return (
     <>
-      <Topbar title="客户" subtitle={`按优先级排序 · 共 ${views.length} 家`} />
+      <Topbar title="客户看板" subtitle={`按优先级排序 · 共 ${views.length} 家`} />
       <main className="mx-auto max-w-7xl space-y-4 px-6 py-6">
         <div className="flex gap-1.5">
           {filters.map((f) => (
