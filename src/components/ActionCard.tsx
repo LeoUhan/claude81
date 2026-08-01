@@ -1,13 +1,15 @@
 import { useState } from 'react'
-import { CheckCircle2, Clock, Loader2, Pencil, RefreshCcw, Send, ShieldAlert, XCircle } from 'lucide-react'
+import { CheckCircle2, Clock, FileText, Loader2, Pencil, RefreshCcw, Send, ShieldAlert, XCircle } from 'lucide-react'
 import { ActionRecord, OutreachChannel } from '../types'
 import { actionStatusStyle, actionTypeStyle } from '../ui/styles'
 import { useAppStore, customerSeed } from '../store/AppStore'
 import { useRole } from '../store/RoleContext'
 import { buildCustomerView } from '../engine/selectors'
+import { buildProposalDoc } from '../engine/proposal'
 import { OUTREACH_CHANNELS, buildOutreachContent } from '../engine/outreachContent'
 import { REPLY_PRESET_BY_CUSTOMER } from '../engine/replyPresets'
 import ActionContentPreview from './ActionContentPreview'
+import ClientProposalModal from './ClientProposalModal'
 
 const REPLY_INTENTS: { intent: string; text: string; sentiment: number }[] = [
   { intent: '积极意向', text: '好的，麻烦帮我们看看，我们也想把网站利用起来。', sentiment: 0.8 },
@@ -36,6 +38,7 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
   const [reviewSnapshot, setReviewSnapshot] = useState<ReturnType<typeof buildCustomerView>['health'] | null>(null)
   const isOutreach = action.type === '客户触达'
   const customer = customerSeed.find((c) => c.id === action.customerId)
+  const [showProposal, setShowProposal] = useState(false)
 
   function regenerate() {
     if (!customer || !action.outreachScenario) return
@@ -172,6 +175,18 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
       {!canApprove && !['已完成', '已取消'].includes(action.status) && (
         <div className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-400">
           系统管理员无业务审批权限，需由 CSM / 销售 / 主管确认执行。
+        </div>
+      )}
+
+      {!editing && action.status !== '已取消' && (
+        <div className="mt-3">
+          <button
+            onClick={() => setShowProposal(true)}
+            className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700"
+          >
+            <FileText size={13} />
+            生成客户方案
+          </button>
         </div>
       )}
 
@@ -329,6 +344,13 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
           ))}
         </ul>
       </details>
+
+      {showProposal && customer && (
+        <ClientProposalModal
+          doc={buildProposalDoc(action, customer, buildCustomerView(customer, state.actions).signals)}
+          onClose={() => setShowProposal(false)}
+        />
+      )}
     </div>
   )
 }
