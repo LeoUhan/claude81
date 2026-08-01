@@ -90,13 +90,19 @@ export default function AgentHero({ monitoredCount, highRisk, actionCount, avgLe
           <h3 className="text-[10.5px] font-semibold tracking-wide text-slate-400">实时信号流</h3>
           <span className="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2 py-0.5 text-[9px] text-emerald-300">● LIVE</span>
         </div>
-        {events.map((ev) => (
-          <div key={ev.id} className="flex items-center gap-2 border-b border-white/[0.06] py-1.5 last:border-b-0">
-            <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: ev.color }} />
-            <span className="min-w-0 flex-1 truncate text-[11.5px] text-slate-200">{ev.text}</span>
-            <span className="shrink-0 font-mono text-[9.5px] text-slate-500">{timeAgo(ev.at)}</span>
+        {events.length > 0 && (
+          <div className="relative mt-1 h-[124px] overflow-hidden">
+            <div className="absolute inset-x-0 top-0 animate-[scroll-up_16s_linear_infinite]">
+              {[...events, ...events].map((ev, i) => (
+                <div key={`${ev.id}-${i}`} className="flex items-center gap-2 border-b border-white/[0.06] py-1.5">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: ev.color }} />
+                  <span className="min-w-0 flex-1 truncate text-[11.5px] text-slate-200">{ev.text}</span>
+                  <span className="shrink-0 font-mono text-[9.5px] text-slate-500">{timeAgo(ev.at)}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
+        )}
       </div>
     </div>
   )

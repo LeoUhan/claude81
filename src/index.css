@@ -37,6 +37,10 @@ body {
   50% { transform: scale(1.06); }
 }
 
+@keyframes scroll-up {
+  to { transform: translateY(-50%); }
+}
+
 @media print {
   body * {
     visibility: hidden;
