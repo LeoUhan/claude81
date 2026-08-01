@@ -347,7 +347,10 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
 
       {showProposal && customer && (
         <ClientProposalModal
-          doc={buildProposalDoc(action, customer, buildCustomerView(customer, state.actions).signals)}
+          doc={(() => {
+            const view = buildCustomerView(customer, state.actions)
+            return buildProposalDoc(action, customer, view.signals, view.health, view.churnProbability)
+          })()}
           onClose={() => setShowProposal(false)}
         />
       )}
