@@ -21,15 +21,15 @@ const DIM_LABEL: Record<string, string> = {
   action: '动作与结果反馈',
 }
 
-const SIGNAL_CATEGORY: Record<SignalType, { label: string; accent: string; tint: string }> = {
-  运营停滞: { label: '账户信号', accent: '#4a3aa7', tint: '#f2f0fb' },
-  流量下滑: { label: '网站状态', accent: '#2a78d6', tint: '#eef4fc' },
-  询盘异常: { label: '网站状态', accent: '#2a78d6', tint: '#eef4fc' },
-  同行落后: { label: '同行对标', accent: '#c14fa0', tint: '#fbeef8' },
-  续费窗口临近: { label: '续费阶段', accent: '#c98500', tint: '#fdf3e0' },
-  持续价值: { label: '价值信号', accent: '#0f8c5f', tint: '#eaf8f1' },
-  触达未回复: { label: '跟进状态', accent: '#898781', tint: '#f4f3f1' },
-  优化未见效: { label: '跟进状态', accent: '#898781', tint: '#f4f3f1' },
+const SIGNAL_CATEGORY: Record<SignalType, { label: string; accent: string; icon: string }> = {
+  运营停滞: { label: '账户信号', accent: '#7c3aed', icon: '◆' },
+  流量下滑: { label: '网站状态', accent: '#2563eb', icon: '▲' },
+  询盘异常: { label: '网站状态', accent: '#2563eb', icon: '▲' },
+  同行落后: { label: '同行对标', accent: '#c026d3', icon: '●' },
+  续费窗口临近: { label: '续费阶段', accent: '#c98500', icon: '■' },
+  持续价值: { label: '价值信号', accent: '#059669', icon: '✦' },
+  触达未回复: { label: '跟进状态', accent: '#64748b', icon: '○' },
+  优化未见效: { label: '跟进状态', accent: '#64748b', icon: '○' },
 }
 
 function actionTag(type: SignalType, confidence: '高' | '中' | '低') {
@@ -164,26 +164,30 @@ export default function CustomerDetail() {
           {view.signals.length === 0 ? (
             <p className="mt-3 text-sm text-slate-400">未发现需要关注的信号</p>
           ) : (
-            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-3 divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-100">
               {view.signals.map((s) => {
                 const cat = SIGNAL_CATEGORY[s.type]
                 const tag = actionTag(s.type, s.confidence)
                 return (
-                  <div
-                    key={s.id}
-                    className="rounded-2xl border border-slate-100 p-4"
-                    style={{ background: cat.tint }}
-                  >
-                    <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: cat.accent }}>
-                      {cat.label}
+                  <div key={s.id} className="flex items-start gap-3 px-4 py-3">
+                    <span
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm text-white"
+                      style={{ background: cat.accent }}
+                    >
+                      {cat.icon}
                     </span>
-                    <p className="mt-1.5 text-base font-semibold leading-snug text-slate-800">{s.type}</p>
-                    <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{s.text}</p>
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="text-[11px] text-slate-400">证据：{s.evidence}</span>
+                    <div className="min-w-0 flex-1">
+                      <span className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">{cat.label}</span>
+                      <p className="text-sm">
+                        <span className="font-semibold text-slate-800">{s.type}</span>
+                        <span className="ml-2 text-slate-500">{s.text}</span>
+                      </p>
+                      <p className="mt-0.5 truncate font-mono text-[10px] text-slate-400" title={s.evidence}>
+                        {s.evidence}
+                      </p>
                     </div>
                     <span
-                      className="mt-2 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium"
+                      className="mt-0.5 shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium"
                       style={{ background: tag.bg, color: tag.color }}
                     >
                       {tag.text}
@@ -200,43 +204,59 @@ export default function CustomerDetail() {
         {/* Agent 结论 */}
         <div className="rounded-xl border border-slate-200 bg-white p-5">
           <h2 className="text-sm font-semibold text-slate-800">Agent 判断结论</h2>
-          <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <h3 className="text-xs font-medium text-slate-500">推断（Agent 结论）</h3>
-              <ul className="mt-1.5 list-disc space-y-0.5 pl-4 text-sm text-slate-600">
+          <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div className="rounded-xl border border-violet-100 bg-violet-50/60 p-4">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-violet-600">◆ 推断</span>
+              <ul className="mt-2 space-y-1 text-sm text-slate-700">
                 {view.health.factors.map((f, i) => (
-                  <li key={i}>{f}</li>
+                  <li key={i}>· {f}</li>
                 ))}
               </ul>
             </div>
-            <div className="space-y-3">
-              {view.crossInsights.length > 0 && (
-                <div>
-                  <h3 className="text-xs font-medium text-slate-500">交叉推理（多个信号如何互相印证）</h3>
-                  <ul className="mt-1.5 list-disc space-y-0.5 pl-4 text-sm text-violet-700">
-                    {view.crossInsights.map((c, i) => (
-                      <li key={i}>{c}</li>
-                    ))}
-                  </ul>
-                </div>
+
+            <div className="rounded-xl border border-fuchsia-100 bg-fuchsia-50/60 p-4">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-fuchsia-600">✕ 交叉推理</span>
+              {view.crossInsights.length > 0 ? (
+                <ul className="mt-2 space-y-1.5 text-sm leading-snug text-slate-700">
+                  {view.crossInsights.map((c, i) => (
+                    <li key={i}>{c}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-2 text-sm text-slate-400">暂无信号叠加，未发现互相印证或冲突的情况</p>
               )}
               {view.health.missing.length > 0 && (
-                <div className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
-                  数据缺失：{view.health.missing.join('、')}，相关权重已按剩余维度重新分配，未计为 0 分或满分。
-                </div>
-              )}
-              <div>
-                <h3 className="text-xs font-medium text-slate-500">建议动作</h3>
-                <p className="mt-1 text-sm text-slate-600">
-                  {actions.length > 0 ? `已生成 ${actions.length} 项动作，见下方动作列表` : '当前无需生成新动作'}
+                <p className="mt-2 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[11px] text-amber-700">
+                  数据缺失：{view.health.missing.join('、')}，权重已按剩余维度重新分配
                 </p>
-              </div>
+              )}
+            </div>
+
+            <div className="flex flex-col rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700">→ 建议动作</span>
+              <p className="mt-2 flex-1 text-sm text-slate-700">
+                {actions.length > 0 ? (
+                  <>
+                    已生成 <span className="text-xl font-bold text-emerald-700">{actions.length}</span> 项动作
+                  </>
+                ) : (
+                  '当前无需生成新动作'
+                )}
+              </p>
+              {actions.length > 0 && (
+                <a
+                  href="#actions-section"
+                  className="mt-3 self-start rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-emerald-700"
+                >
+                  查看动作列表 →
+                </a>
+              )}
             </div>
           </div>
         </div>
 
         {/* 动作列表 */}
-        <div>
+        <div id="actions-section">
           <h2 className="mb-3 text-sm font-semibold text-slate-700">动作与执行</h2>
           {actions.length === 0 ? (
             <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-400">
