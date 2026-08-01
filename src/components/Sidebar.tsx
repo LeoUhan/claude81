@@ -22,7 +22,7 @@ export default function Sidebar() {
         </div>
         <div>
           <div className="text-sm font-bold leading-none text-slate-800">Value-Guard</div>
-          <div className="mt-0.5 text-[10px] leading-none text-slate-400">客户价值守护 Agent</div>
+          <div className="mt-0.5 text-[10px] leading-none text-slate-400">流失预测 · 价值守护 Agent</div>
         </div>
       </div>
 
