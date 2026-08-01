@@ -10,7 +10,7 @@ interface State {
   lastScanAt: string | null
 }
 
-const STORAGE_KEY = 'value-guard-state-v3'
+const STORAGE_KEY = 'value-guard-state-v4'
 
 let eventCounter = 0
 function logEvent(events: EventLogItem[], kind: string, detail: string, customerId?: string, actionId?: string) {

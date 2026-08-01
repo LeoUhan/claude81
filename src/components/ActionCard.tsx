@@ -6,6 +6,7 @@ import { useAppStore, customerSeed } from '../store/AppStore'
 import { useRole } from '../store/RoleContext'
 import { buildCustomerView } from '../engine/selectors'
 import { OUTREACH_CHANNELS, buildOutreachContent } from '../engine/outreachContent'
+import { REPLY_PRESET_BY_CUSTOMER } from '../engine/replyPresets'
 import ActionContentPreview from './ActionContentPreview'
 
 const REPLY_INTENTS: { intent: string; text: string; sentiment: number }[] = [
@@ -25,7 +26,6 @@ const REVIEW_LABEL: Record<'improved' | 'no-change' | 'escalate', string> = {
 export default function ActionCard({ action, customerName }: { action: ActionRecord; customerName?: string }) {
   const { state, dispatch } = useAppStore()
   const { canApprove } = useRole()
-  const [showReply, setShowReply] = useState(false)
   const style = actionStatusStyle[action.status]
   const typeStyle = actionTypeStyle[action.type]
   const [editing, setEditing] = useState(false)
@@ -244,30 +244,15 @@ export default function ActionCard({ action, customerName }: { action: ActionRec
         )}
 
         {action.status === '等待客户结果' && !action.customerReply && (
-          <div className="w-full">
-            <button
-              onClick={() => setShowReply((v) => !v)}
-              className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
-            >
-              模拟客户回复
-            </button>
-            {showReply && (
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {REPLY_INTENTS.map((r) => (
-                  <button
-                    key={r.intent}
-                    onClick={() => {
-                      dispatch({ kind: 'REPLY', actionId: action.id, intent: r.intent, text: r.text, sentiment: r.sentiment })
-                      setShowReply(false)
-                    }}
-                    className="rounded-full border border-slate-200 px-2.5 py-1 text-[11px] text-slate-600 hover:border-violet-300 hover:bg-violet-50"
-                  >
-                    {r.intent}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <button
+            onClick={() => {
+              const preset = REPLY_INTENTS.find((r) => r.intent === (REPLY_PRESET_BY_CUSTOMER[action.customerId] ?? '观望')) ?? REPLY_INTENTS[1]
+              dispatch({ kind: 'REPLY', actionId: action.id, intent: preset.intent, text: preset.text, sentiment: preset.sentiment })
+            }}
+            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+          >
+            查看客户回复
+          </button>
         )}
 
         {action.status === '已收到结果' && (
