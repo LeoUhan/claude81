@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { ChevronDown, LayoutGrid, ListChecks, ShieldCheck, Sparkles, TrendingUp, Users, SlidersHorizontal } from 'lucide-react'
+import { ChevronDown, LayoutGrid, ListChecks, ShieldCheck, Sparkles, TrendingUp, Users, SlidersHorizontal, History } from 'lucide-react'
 import { roles, useRole } from '../store/RoleContext'
 import { useAppStore } from '../store/AppStore'
 
@@ -23,6 +23,7 @@ const nav = [
   { to: '/', label: '监测总览', icon: LayoutGrid, end: true, roles: null },
   { to: '/customers', label: '客户看板', icon: Users, roles: null },
   { to: '/actions', label: '执行中心', icon: ListChecks, roles: null },
+  { to: '/retrospective', label: '复盘', icon: History, roles: null },
   { to: '/efficiency', label: '效能复盘', icon: TrendingUp, roles: ['客户成功主管', '系统管理员'] as const },
   { to: '/settings', label: '规则与设置', icon: SlidersHorizontal, roles: ['系统管理员'] as const },
 ]

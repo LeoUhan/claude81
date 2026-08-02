@@ -6,6 +6,7 @@ import Customers from './pages/Customers'
 import CustomerDetail from './pages/CustomerDetail'
 import Actions from './pages/Actions'
 import Efficiency from './pages/Efficiency'
+import Retrospective from './pages/Retrospective'
 import Settings from './pages/Settings'
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         <Route path="/customers/:id" element={<CustomerDetail />} />
         <Route path="/actions" element={<Actions />} />
         <Route path="/efficiency" element={<Efficiency />} />
+        <Route path="/retrospective" element={<Retrospective />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
     </Routes>
